@@ -17,7 +17,11 @@ int overrun3 = 0;
 int overrun4 = 0;
 int workingArray[100][100];
 
-void* doWork(void*);
+void doWork();
+void* p1(void*);
+void* p2(void*);
+void* p3(void*);
+void* p4(void*);
 
 
 int main(int argc, char const *argv[])
@@ -31,10 +35,10 @@ int main(int argc, char const *argv[])
 	pthread_t thread4;
 
 // actually create all threads
-	pthread_create(&thread1, NULL, doWork, NULL);
-	pthread_create(&thread2, NULL, doWork, NULL);
-	pthread_create(&thread3, NULL, doWork, NULL);
-	pthread_create(&thread4, NULL, doWork, NULL);
+	pthread_create(&thread1, NULL, p1, NULL);
+	pthread_create(&thread2, NULL, p2, NULL);
+	pthread_create(&thread3, NULL, p3, NULL);
+	pthread_create(&thread4, NULL, p4, NULL);
 
 	while (i < 160)
 	{
@@ -85,7 +89,7 @@ int main(int argc, char const *argv[])
 
 // doWork function
 
-void* doWork(void*)
+void doWork()
 {
 	for (int i = 0; i < 100; i++)
 	{
@@ -93,6 +97,68 @@ void* doWork(void*)
 		{
 			workingArray[i][j] = 1;
 		}
+	}
+}
+
+
+void* p1(void*)
+{
+	bool thread1FinishFlag = false;
+	while(1)
+	{
+		sem_wait(thread1);
+		thread1FinishFlag = false;
+		for (int i = 0; i < 1; i++)
+		{
+			doWork();
+		}
+		//increment counter here
+		thread1FinishFlag = true;
+	}
+}
+void* p2(void*)
+{
+	bool thread2FinishFlag = false;
+	while(1)
+	{
+		sem_wait(thread2);
+		thread2FinishFlag = false;
+		for (int i = 0; i < 2; i++)
+		{
+			doWork();
+		}
+		//increment counter here
+		thread2FinishFlag = true;
+	}
+}
+void* p3(void*)
+{
+	bool thread3FinishFlag = false;
+	while(1)
+	{
+		sem_wait(thread3);
+		thread1FinishFlag = false;
+		for (int i = 0; i < 4; i++)
+		{
+			doWork();
+		}
+		//increment counter here
+		thread3FinishFlag = true;
+	}
+}
+void* p4(void*)
+{
+	bool thread4FinishFlag = false;
+	while(1)
+	{
+		sem_wait(thread4);
+		thread4FinishFlag = false;
+		for (int i = 0; i < 16; i++)
+		{
+			doWork();
+		}
+		//increment counter here
+		thread4FinishFlag = true;
 	}
 }
 
