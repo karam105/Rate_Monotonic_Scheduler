@@ -17,7 +17,7 @@ int overrun3 = 0;
 int overrun4 = 0;
 int workingArray[100][100];
 
-void doWork();
+void* doWork(void*);
 
 
 int main(int argc, char const *argv[])
@@ -85,7 +85,7 @@ int main(int argc, char const *argv[])
 
 // doWork function
 
-void doWork()
+void* doWork(void*)
 {
 	for (int i = 0; i < 100; i++)
 	{
