@@ -17,11 +17,11 @@ int overrun3 = 0;
 int overrun4 = 0;
 int workingArray[100][100];
 
-void doWork();
-void* p1(void*);
-void* p2(void*);
-void* p3(void*);
-void* p4(void*);
+int doWork();
+void* p1(void *param);
+void* p2(void *param);
+void* p3(void *param);
+void* p4(void *param);
 
 
 int main(int argc, char const *argv[])
@@ -89,19 +89,33 @@ int main(int argc, char const *argv[])
 
 // doWork function
 
-void doWork()
+int doWork()
 {
-	for (int i = 0; i < 100; i++)
+	int lousyArray[10][10];
+	int product = 1;
+
+	for (int i = 0; i < 10; i++)
 	{
-		for (int j = 0; j < 100; j++)
+		for (int j = 0; j < 10; j++)
 		{
-			workingArray[i][j] = 1;
+			lousyArray[i][j] = 1;
 		}
 	}
+	for (int k = 0; k < 1; k++)
+	{
+		for (int j = 0; j < 10; j++)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				product *= lousyArray[i][j];
+			}
+		}
+	}
+	return 1;
 }
 
 
-void* p1(void*)
+void* p1(void *param)
 {
 	bool thread1FinishFlag = false;
 	while(1)
@@ -116,7 +130,7 @@ void* p1(void*)
 		thread1FinishFlag = true;
 	}
 }
-void* p2(void*)
+void* p2(void *param)
 {
 	bool thread2FinishFlag = false;
 	while(1)
@@ -131,7 +145,7 @@ void* p2(void*)
 		thread2FinishFlag = true;
 	}
 }
-void* p3(void*)
+void* p3(void *param)
 {
 	bool thread3FinishFlag = false;
 	while(1)
@@ -146,7 +160,7 @@ void* p3(void*)
 		thread3FinishFlag = true;
 	}
 }
-void* p4(void*)
+void* p4(void *param)
 {
 	bool thread4FinishFlag = false;
 	while(1)
@@ -170,3 +184,12 @@ auto start = std::chrono::high_resolution_clock::now();
 auto elapsed = std::chrono::high_resolution_clock::now() - start;
 
 long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();*/
+
+void nsleep()
+{
+	struct timespec delay;
+
+	delay.tv_sec = 0;
+	delay.tv_sec = 100000000L;
+	nanosleep(&delay, NULL);
+}
