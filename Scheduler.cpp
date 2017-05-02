@@ -8,6 +8,10 @@
 using namespace std;
 
 sem_t semaphore;
+sem_t mutex1;
+sem_t mutex2;
+sem_t mutex3;
+sem_t mutex4;
 
 // initialze variables
 int i = 0;
@@ -26,7 +30,10 @@ void* p4(void *param);
 
 int main(int argc, char const *argv[])
 {
-	sem_init(&semaphore, 0, 1);
+	sem_init(&mutex1, 0, 0);
+	sem_init(&mutex2, 0, 0);
+	sem_init(&mutex3, 0, 0);
+	sem_init(&mutex4, 0, 0);
 
 // initialze all threads
 	pthread_t thread1;
@@ -44,36 +51,36 @@ int main(int argc, char const *argv[])
 	{
 		if (i == 0) // initial case.  at time 0 schedule all threads
 		{
-			sem_signal(thread1);
-			sem_signal(thread2);
-			sem_signal(thread3);
-			sem_signal(thread4);
+			sem_post(&mutex1);
+			sem_post(&mutex2);
+			sem_post(&mutex3);
+			sem_post(&mutex4);
 		}
 
 		else if (i % 16 == 0) // last case which happens every 16 units which schedules all threads again
 		{
-			sem_signal(thread1);
-			sem_signal(thread2);
-			sem_signal(thread3);
-			sem_signal(thread4);
+			sem_post(&mutex1);
+			sem_post(&mutex2);
+			sem_post(&mutex3);
+			sem_post(&mutex4);
 		}
 
 		else if (i % 4 == 0) // case that happens every 4 units of time
 		{
-			sem_signal(thread1);
-			sem_signal(thread2);
-			sem_signal(thread3);
+			sem_post(&mutex1);
+			sem_post(&mutex2);
+			sem_post(&mutex3);
 		}
 
 		else if (i % 2 == 0) // case that happens every other unit of time
 		{
-			sem_signal(thread1);
-			sem_signal(thread2);
+			sem_post(&mutex1);
+			sem_post(&mutex2);
 		}
 
 		else if (i % 1 == 0) // case that happens every unit of time
 		{
-			sem_signal(thread1);
+			sem_post(&mutex1);
 		}
 		i++; // increment i to go through the loop again
 	}
@@ -120,7 +127,7 @@ void* p1(void *param)
 	bool thread1FinishFlag = false;
 	while(1)
 	{
-		sem_wait(thread1);
+		sem_wait(&mutex1);
 		thread1FinishFlag = false;
 		for (int i = 0; i < 1; i++)
 		{
@@ -135,7 +142,7 @@ void* p2(void *param)
 	bool thread2FinishFlag = false;
 	while(1)
 	{
-		sem_wait(thread2);
+		sem_wait(&mutex2);
 		thread2FinishFlag = false;
 		for (int i = 0; i < 2; i++)
 		{
@@ -150,8 +157,8 @@ void* p3(void *param)
 	bool thread3FinishFlag = false;
 	while(1)
 	{
-		sem_wait(thread3);
-		thread1FinishFlag = false;
+		sem_wait(&mutex3);
+		thread3FinishFlag = false;
 		for (int i = 0; i < 4; i++)
 		{
 			doWork();
@@ -165,7 +172,7 @@ void* p4(void *param)
 	bool thread4FinishFlag = false;
 	while(1)
 	{
-		sem_wait(thread4);
+		sem_wait(&mutex4);
 		thread4FinishFlag = false;
 		for (int i = 0; i < 16; i++)
 		{
@@ -175,15 +182,6 @@ void* p4(void *param)
 		thread4FinishFlag = true;
 	}
 }
-
-/* possible timer in microseconds
-If you are using c++11 or later you could use std::chrono::high_resolution_clock.
-
-auto start = std::chrono::high_resolution_clock::now();
-...
-auto elapsed = std::chrono::high_resolution_clock::now() - start;
-
-long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();*/
 
 void nsleep()
 {
