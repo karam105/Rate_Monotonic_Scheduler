@@ -1,9 +1,14 @@
+#define _GNU_SOURCE
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
 #include <mutex>
 #include <condition_variable>
 #include <semaphore.h>
+#include <sched.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -19,7 +24,6 @@ int overrun1 = 0;
 int overrun2 = 0;
 int overrun3 = 0;
 int overrun4 = 0;
-int workingArray[100][100];
 
 int doWork();
 void* p1(void *param);
@@ -28,8 +32,14 @@ void* p3(void *param);
 void* p4(void *param);
 
 
+
 int main(int argc, char const *argv[])
 {
+	cpu_set_t cpus;
+
+	CPU_ZERO(&cpus);
+	CPU_SET(1, &cpus);
+
 	sem_init(&mutex1, 0, 0);
 	sem_init(&mutex2, 0, 0);
 	sem_init(&mutex3, 0, 0);
