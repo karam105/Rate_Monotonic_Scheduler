@@ -1,18 +1,12 @@
-#define _GNU_SOURCE
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
 #include <mutex>
 #include <condition_variable>
 #include <semaphore.h>
-#include <sched.h>
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
 
 using namespace std;
 
-sem_t semaphore;
 sem_t mutex1;
 sem_t mutex2;
 sem_t mutex3;
@@ -24,22 +18,32 @@ int overrun1 = 0;
 int overrun2 = 0;
 int overrun3 = 0;
 int overrun4 = 0;
+int loop1 = 0;
+int loop2 = 0;
+int loop3 = 0;
+int loop4 = 0;
+
+bool thread1FinishFlag = false;
+bool thread2FinishFlag = false;
+bool thread3FinishFlag = false;
+bool thread4FinishFlag = false;
+
+pthread_attr_t mattr;
+pthread_attr_t tattr;
+
+int mainpriority = 1;
+int threadpriority = 2;
 
 int doWork();
+void nsleep();
 void* p1(void *param);
 void* p2(void *param);
 void* p3(void *param);
 void* p4(void *param);
 
 
-
 int main(int argc, char const *argv[])
 {
-	cpu_set_t cpus;
-
-	CPU_ZERO(&cpus);
-	CPU_SET(1, &cpus);
-
 	sem_init(&mutex1, 0, 0);
 	sem_init(&mutex2, 0, 0);
 	sem_init(&mutex3, 0, 0);
@@ -56,9 +60,9 @@ int main(int argc, char const *argv[])
 	pthread_create(&thread2, NULL, p2, NULL);
 	pthread_create(&thread3, NULL, p3, NULL);
 	pthread_create(&thread4, NULL, p4, NULL);
-
 	while (i < 160)
 	{
+		nsleep();
 		if (i == 0) // initial case.  at time 0 schedule all threads
 		{
 			sem_post(&mutex1);
@@ -69,6 +73,10 @@ int main(int argc, char const *argv[])
 
 		else if (i % 16 == 0) // last case which happens every 16 units which schedules all threads again
 		{
+			if (thread1FinishFlag == false){overrun1++;}
+			if (thread2FinishFlag == false){overrun2++;}
+			if (thread3FinishFlag == false){overrun3++;}
+			if (thread4FinishFlag == false){overrun4++;}
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 			sem_post(&mutex3);
@@ -77,6 +85,9 @@ int main(int argc, char const *argv[])
 
 		else if (i % 4 == 0) // case that happens every 4 units of time
 		{
+			if (thread1FinishFlag == false){overrun1++;}
+			if (thread2FinishFlag == false){overrun2++;}
+			if (thread3FinishFlag == false){overrun3++;}
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 			sem_post(&mutex3);
@@ -84,23 +95,36 @@ int main(int argc, char const *argv[])
 
 		else if (i % 2 == 0) // case that happens every other unit of time
 		{
+			if (thread1FinishFlag == false){overrun1++;}
+			if (thread2FinishFlag == false){overrun2++;}
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 		}
 
 		else if (i % 1 == 0) // case that happens every unit of time
 		{
+			if (thread1FinishFlag == false){overrun1++;}
 			sem_post(&mutex1);
 		}
 		i++; // increment i to go through the loop again
 	}
 
-// join all threads back to the main one
-	pthread_join(thread1, NULL);
-	pthread_join(thread2, NULL);
-	pthread_join(thread3, NULL);
-	pthread_join(thread4, NULL);
+	cout << "Total runs: " << i << endl;
+	cout << "Thread 1 overruns: " << overrun1 << endl;
+	cout << "Thread 2 overruns: " << overrun2 << endl;
+	cout << "Thread 3 overruns: " << overrun3 << endl;
+	cout << "Thread 4 overruns: " << overrun4 << endl;
 
+	cout << "Total thread1 runs: " << loop1 << endl;
+	cout << "Total thread2 runs: " << loop2 << endl;
+	cout << "Total thread3 runs: " << loop3 << endl;
+	cout << "Total thread4 runs: " << loop4 << endl;
+
+	sleep(1);
+	pthread_cancel(thread1);
+	pthread_cancel(thread2);
+	pthread_cancel(thread3);
+	pthread_cancel(thread4);
 	return 0;
 }
 
@@ -132,9 +156,10 @@ int doWork()
 }
 
 
+
 void* p1(void *param)
 {
-	bool thread1FinishFlag = false;
+	thread1FinishFlag = false;
 	while(1)
 	{
 		sem_wait(&mutex1);
@@ -143,13 +168,14 @@ void* p1(void *param)
 		{
 			doWork();
 		}
-		//increment counter here
+		loop1++;
 		thread1FinishFlag = true;
 	}
 }
+
 void* p2(void *param)
 {
-	bool thread2FinishFlag = false;
+	thread2FinishFlag = false;
 	while(1)
 	{
 		sem_wait(&mutex2);
@@ -158,13 +184,14 @@ void* p2(void *param)
 		{
 			doWork();
 		}
-		//increment counter here
+		loop2++;
 		thread2FinishFlag = true;
 	}
 }
+
 void* p3(void *param)
 {
-	bool thread3FinishFlag = false;
+	thread3FinishFlag = false;
 	while(1)
 	{
 		sem_wait(&mutex3);
@@ -173,13 +200,14 @@ void* p3(void *param)
 		{
 			doWork();
 		}
-		//increment counter here
+		loop3++;
 		thread3FinishFlag = true;
 	}
 }
+
 void* p4(void *param)
 {
-	bool thread4FinishFlag = false;
+	thread4FinishFlag = false;
 	while(1)
 	{
 		sem_wait(&mutex4);
@@ -188,10 +216,12 @@ void* p4(void *param)
 		{
 			doWork();
 		}
-		//increment counter here
+		loop4++;
 		thread4FinishFlag = true;
 	}
 }
+
+
 
 void nsleep()
 {
