@@ -28,12 +28,6 @@ bool thread2FinishFlag = false;
 bool thread3FinishFlag = false;
 bool thread4FinishFlag = false;
 
-pthread_attr_t mattr;
-pthread_attr_t tattr;
-
-int mainpriority = 1;
-int threadpriority = 2;
-
 int doWork();
 void nsleep();
 void* p1(void *param);
@@ -73,38 +67,38 @@ int main(int argc, char const *argv[])
 
 		else if (i % 16 == 0) // last case which happens every 16 units which schedules all threads again
 		{
-			if (thread1FinishFlag == false){overrun1++;}
-			if (thread2FinishFlag == false){overrun2++;}
-			if (thread3FinishFlag == false){overrun3++;}
-			if (thread4FinishFlag == false){overrun4++;}
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 			sem_post(&mutex3);
 			sem_post(&mutex4);
+			// if (thread1FinishFlag == false){overrun1++;}
+			// if (thread2FinishFlag == false){overrun2++;}
+			// if (thread3FinishFlag == false){overrun3++;}
+			if (thread4FinishFlag == false){overrun4++;}
 		}
 
 		else if (i % 4 == 0) // case that happens every 4 units of time
 		{
-			if (thread1FinishFlag == false){overrun1++;}
-			if (thread2FinishFlag == false){overrun2++;}
-			if (thread3FinishFlag == false){overrun3++;}
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 			sem_post(&mutex3);
+			// if (thread1FinishFlag == false){overrun1++;}
+			// if (thread2FinishFlag == false){overrun2++;}
+			if (thread3FinishFlag == false){overrun3++;}
 		}
 
 		else if (i % 2 == 0) // case that happens every other unit of time
 		{
-			if (thread1FinishFlag == false){overrun1++;}
-			if (thread2FinishFlag == false){overrun2++;}
 			sem_post(&mutex1);
 			sem_post(&mutex2);
+			// if (thread1FinishFlag == false){overrun1++;}
+			if (thread2FinishFlag == false){overrun2++;}
 		}
 
 		else if (i % 1 == 0) // case that happens every unit of time
 		{
-			if (thread1FinishFlag == false){overrun1++;}
 			sem_post(&mutex1);
+			if (thread1FinishFlag == false){overrun1++;}
 		}
 		i++; // increment i to go through the loop again
 	}
@@ -121,6 +115,10 @@ int main(int argc, char const *argv[])
 	cout << "Total thread4 runs: " << loop4 << endl;
 
 	sleep(1);
+	sem_destroy(&mutex1);
+	sem_destroy(&mutex2);
+	sem_destroy(&mutex3);
+	sem_destroy(&mutex4);
 	pthread_cancel(thread1);
 	pthread_cancel(thread2);
 	pthread_cancel(thread3);
