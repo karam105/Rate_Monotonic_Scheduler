@@ -71,9 +71,6 @@ int main(int argc, char const *argv[])
 			sem_post(&mutex2);
 			sem_post(&mutex3);
 			sem_post(&mutex4);
-			// if (thread1FinishFlag == false){overrun1++;}
-			// if (thread2FinishFlag == false){overrun2++;}
-			// if (thread3FinishFlag == false){overrun3++;}
 			if (thread4FinishFlag == false){overrun4++;}
 		}
 
@@ -82,8 +79,6 @@ int main(int argc, char const *argv[])
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 			sem_post(&mutex3);
-			// if (thread1FinishFlag == false){overrun1++;}
-			// if (thread2FinishFlag == false){overrun2++;}
 			if (thread3FinishFlag == false){overrun3++;}
 		}
 
@@ -91,7 +86,6 @@ int main(int argc, char const *argv[])
 		{
 			sem_post(&mutex1);
 			sem_post(&mutex2);
-			// if (thread1FinishFlag == false){overrun1++;}
 			if (thread2FinishFlag == false){overrun2++;}
 		}
 
@@ -115,10 +109,6 @@ int main(int argc, char const *argv[])
 	cout << "Total thread4 runs: " << loop4 << endl;
 
 	sleep(1);
-	sem_destroy(&mutex1);
-	sem_destroy(&mutex2);
-	sem_destroy(&mutex3);
-	sem_destroy(&mutex4);
 	pthread_cancel(thread1);
 	pthread_cancel(thread2);
 	pthread_cancel(thread3);
@@ -161,7 +151,6 @@ void* p1(void *param)
 	while(1)
 	{
 		sem_wait(&mutex1);
-		thread1FinishFlag = false;
 		for (int i = 0; i < 1; i++)
 		{
 			doWork();
@@ -177,7 +166,6 @@ void* p2(void *param)
 	while(1)
 	{
 		sem_wait(&mutex2);
-		thread2FinishFlag = false;
 		for (int i = 0; i < 2; i++)
 		{
 			doWork();
@@ -193,7 +181,6 @@ void* p3(void *param)
 	while(1)
 	{
 		sem_wait(&mutex3);
-		thread3FinishFlag = false;
 		for (int i = 0; i < 4; i++)
 		{
 			doWork();
@@ -209,7 +196,6 @@ void* p4(void *param)
 	while(1)
 	{
 		sem_wait(&mutex4);
-		thread4FinishFlag = false;
 		for (int i = 0; i < 16; i++)
 		{
 			doWork();
