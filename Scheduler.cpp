@@ -72,6 +72,9 @@ int main(int argc, char const *argv[])
 			sem_post(&mutex3);
 			sem_post(&mutex4);
 			if (thread4FinishFlag == false){overrun4++;}
+			if (thread3FinishFlag == false){overrun3++;}
+			if (thread2FinishFlag == false){overrun2++;}
+			if (thread1FinishFlag == false){overrun1++;}
 		}
 
 		else if (i % 4 == 0) // case that happens every 4 units of time
@@ -80,6 +83,8 @@ int main(int argc, char const *argv[])
 			sem_post(&mutex2);
 			sem_post(&mutex3);
 			if (thread3FinishFlag == false){overrun3++;}
+			if (thread2FinishFlag == false){overrun2++;}
+			if (thread1FinishFlag == false){overrun1++;}
 		}
 
 		else if (i % 2 == 0) // case that happens every other unit of time
@@ -87,6 +92,7 @@ int main(int argc, char const *argv[])
 			sem_post(&mutex1);
 			sem_post(&mutex2);
 			if (thread2FinishFlag == false){overrun2++;}
+			if (thread1FinishFlag == false){overrun1++;}
 		}
 
 		else if (i % 1 == 0) // case that happens every unit of time
