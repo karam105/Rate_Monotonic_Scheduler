@@ -1,9 +1,8 @@
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
-#include <mutex>
-#include <condition_variable>
 #include <semaphore.h>
+#include <sys/resource.h>
 
 using namespace std;
 
@@ -57,6 +56,7 @@ int main(int argc, char const *argv[])
 	while (i < 160)
 	{
 		nsleep();
+
 		if (i == 0) // initial case.  at time 0 schedule all threads
 		{
 			sem_post(&mutex1);
@@ -116,8 +116,8 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
-// doWork function
 
+// doWork function
 int doWork()
 {
 	int lousyArray[10][10];
@@ -147,6 +147,7 @@ int doWork()
 
 void* p1(void *param)
 {
+	setpriority(PRIO_PROCESS, 0, -18);
 	thread1FinishFlag = false;
 	while(1)
 	{
@@ -162,6 +163,7 @@ void* p1(void *param)
 
 void* p2(void *param)
 {
+	setpriority(PRIO_PROCESS, 0, -17);
 	thread2FinishFlag = false;
 	while(1)
 	{
@@ -177,6 +179,7 @@ void* p2(void *param)
 
 void* p3(void *param)
 {
+	setpriority(PRIO_PROCESS, 0, -16);
 	thread3FinishFlag = false;
 	while(1)
 	{
@@ -192,6 +195,7 @@ void* p3(void *param)
 
 void* p4(void *param)
 {
+	setpriority(PRIO_PROCESS, 0, -15);
 	thread4FinishFlag = false;
 	while(1)
 	{
